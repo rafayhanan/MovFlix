@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "506208218769",
+    "project_id": "movflix-12c2f",
+    "storage_bucket": "movflix-12c2f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506208218769:android:34f44999217f5e4e9f9930",
+        "android_client_info": {
+          "package_name": "com.movflix.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH6310q5MsH_Y60pbBLB-F1WS2aTIFduw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
