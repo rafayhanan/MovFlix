@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/movie.dart';
 import '../services/movie_service.dart';
+import 'movie_page.dart';
 
 class MovieListScreen extends StatefulWidget {
   @override
@@ -72,7 +73,16 @@ class MovieCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return GestureDetector(
+        onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MoviePage(movieId: movie.id),
+        ),
+      );
+    },
+    child: Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -129,6 +139,7 @@ class MovieCard extends StatelessWidget {
           ),
         ],
       ),
+     )
     );
   }
 }
