@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'signup.dart';
+import 'screens/movie_list_screen.dart'; // Add this import
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -39,12 +40,22 @@ class LoginState extends State<Login> {
         email: email,
         password: password,
       );
+
+      if (!mounted) return; // Add this check for mounted state
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Login Successful!"),
           backgroundColor: Colors.green,
         ),
       );
+
+      // Navigate to MovieListScreen and remove all previous routes
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => MovieListScreen()),
+            (Route<dynamic> route) => false,
+      );
+
     } on FirebaseAuthException catch (e) {
       String errorMessage = "An error occurred";
       if (e.code == 'user-not-found') {
