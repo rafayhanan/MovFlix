@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'signup.dart';
-import 'screens/movie_list_screen.dart'; // Add this import
+import 'movie_list_screen.dart'; // Add this import
 
 class Login extends StatefulWidget {
   const Login({super.key});
