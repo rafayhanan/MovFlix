@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:movflix/screens/wishlist_page.dart';
 import '../models/movie.dart';
 import '../services/movie_service.dart';
 import 'movie_page.dart';
@@ -178,6 +179,18 @@ class _MovieListScreenState extends State<MovieListScreen> {
                 _startSearch();
               }
             },
+          ),
+          IconButton(
+            icon: const Icon(
+            Icons.bookmark,
+            color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => WatchlistScreen()),
+            ).then((_) => _refreshMovies());
+          },
           ),
         ],
       ),
