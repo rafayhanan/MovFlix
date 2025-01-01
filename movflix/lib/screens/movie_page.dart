@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/movie_service.dart';
+import '../services/database_service.dart';
 
 class MoviePage extends StatefulWidget {
   final int movieId;
@@ -13,6 +14,8 @@ class MoviePage extends StatefulWidget {
 
 class _MoviePageState extends State<MoviePage> {
   final MovieService _movieService = MovieService();
+  final DatabaseService _dbService = DatabaseService();
+  bool isInWatchlist = false;
   Map<String, dynamic>? movieData;
   bool isLoading = true;
   String? trailerKey;
@@ -21,6 +24,12 @@ class _MoviePageState extends State<MoviePage> {
   void initState() {
     super.initState();
     _loadMovieDetails();
+    _checkWatchlistStatus();
+  }
+
+  Future<void> _checkWatchlistStatus() async {
+    final status = await _dbService.isInWatchlist(widget.movieId);
+    setState(() => isInWatchlist = status);
   }
 
   Future<void> _loadMovieDetails() async {
@@ -116,7 +125,25 @@ class _MoviePageState extends State<MoviePage> {
                       label: Text('Watch Trailer'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
+                        textStyle: const TextStyle(
+                          color: Colors.white,
+                        )
                       ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await _dbService.toggleWatchlist(widget.movieId);
+                        await _checkWatchlistStatus();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(isInWatchlist ? 'Added to watchlist' : 'Removed from watchlist'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      },
+                      icon: Icon(isInWatchlist ? Icons.bookmark : Icons.bookmark_border),
+                      label: Text(isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     ),
                   SizedBox(height: 16),
 
