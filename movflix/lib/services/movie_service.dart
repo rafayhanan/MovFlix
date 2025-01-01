@@ -93,19 +93,14 @@ class MovieService {
   }
 
   Future<Map<String, dynamic>> getMovieDetails(int movieId) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/movie/$movieId?api_key=$apiKey&append_to_response=credits,videos,similar'),
-      );
+    final response = await http.get(
+      Uri.parse('$baseUrl/movie/$movieId?api_key=$apiKey&append_to_response=videos'),
+    );
 
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        throw ApiException('Failed to load movie details', response.statusCode);
-      }
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw ApiException('Network error occurred', 0);
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load movie details');
     }
   }
 
