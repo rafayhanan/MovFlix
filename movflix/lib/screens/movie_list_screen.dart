@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:movflix/screens/wishlist_page.dart';
 import '../models/movie.dart';
 import '../services/movie_service.dart';
+import 'similar_movie_page.dart';
 import 'movie_page.dart';
 
 class MovieListScreen extends StatefulWidget {
@@ -224,6 +225,27 @@ class _MovieListScreenState extends State<MovieListScreen> {
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.red.shade100,
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SimilarMoviesScreen()),
+                      );
+                    },
+                    child: Text(
+                      "Find a similar movie to your favorite one!",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.red.shade100,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ),
