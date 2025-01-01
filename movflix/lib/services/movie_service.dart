@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import '../models/movie.dart';
 
@@ -7,8 +8,10 @@ class MovieService {
   final String baseUrl = 'https://api.themoviedb.org/3';
   final String imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
 
+
   // HTTP client for reuse
   final http.Client _client = http.Client();
+
 
   Future<List<Movie>> getPopularMovies({int page = 1}) async {
     try {
@@ -104,6 +107,47 @@ class MovieService {
     }
   }
 
+  Future<List<Movie>> getSimilarMovies(int movieId) async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$baseUrl/movie/$movieId/similar?api_key=$apiKey'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final movies = data['results'] as List;
+        return movies.map((movie) => Movie.fromJson(movie)).take(10).toList();
+      } else {
+        throw ApiException('Failed to load similar movies', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error occurred', 0);
+    }
+  }
+
+  Future<List<Movie>> searchMovieByTitle(String title) async {
+    try {
+      final response = await _client.get(
+        Uri.parse(
+          '$baseUrl/search/movie?api_key=$apiKey&query=${Uri.encodeComponent(
+              title)}&page=1',
+        ),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final movies = data['results'] as List;
+        return movies.map((movie) => Movie.fromJson(movie)).take(1).toList();
+      } else {
+        throw ApiException('Failed to search movies', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error occurred', 0);
+    }
+  }
+
+
   String getImageUrl(String? path) {
     if (path == null || path.isEmpty) {
       return ''; // Return empty string or a default image URL
@@ -115,6 +159,8 @@ class MovieService {
     _client.close();
   }
 }
+
+
 
 class ApiException implements Exception {
   final String message;

@@ -37,7 +37,6 @@ class _MoviePageState extends State<MoviePage> {
       final data = await _movieService.getMovieDetails(widget.movieId);
       setState(() {
         movieData = data;
-        // Get the first YouTube trailer
         if (data['videos']?['results'] != null) {
           final videos = data['videos']['results'] as List;
           final trailer = videos.firstWhere(
@@ -51,12 +50,15 @@ class _MoviePageState extends State<MoviePage> {
         isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading movie details')),
-      );
+      setState(() => isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error loading movie details'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -69,95 +71,278 @@ class _MoviePageState extends State<MoviePage> {
     }
   }
 
+  String _formatRuntime(int? minutes) {
+    if (minutes == null) return 'N/A';
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+    return hours > 0 ? '${hours}h ${remainingMinutes}m' : '${remainingMinutes}m';
+  }
+
+  Widget _buildInfoChip(IconData icon, String text, {Color? iconColor}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.red.shade900),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: iconColor ?? Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text('Loading...')),
-        body: Center(child: CircularProgressIndicator()),
+        backgroundColor: Colors.black,
+        body: const Center(
+          child: CircularProgressIndicator(color: Colors.red),
+        ),
       );
     }
 
     if (movieData == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('Error')),
-        body: Center(child: Text('Failed to load movie details')),
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                'Failed to load movie details',
+                style: TextStyle(color: Colors.red.shade100),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadMovieDetails,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade900),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
+    final backdrop = movieData!['backdrop_path'] != null
+        ? 'https://image.tmdb.org/t/p/original${movieData!['backdrop_path']}'
+        : 'https://image.tmdb.org/t/p/w500${movieData!['poster_path']}';
+
     return Scaffold(
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(movieData!['title']),
-        backgroundColor: Colors.red[900],
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: Icon(
+              isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
+              color: Colors.white,
+            ),
+            onPressed: () async {
+              await _dbService.toggleWatchlist(widget.movieId);
+              await _checkWatchlistStatus();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      isInWatchlist ? 'Added to watchlist' : 'Removed from watchlist',
+                    ),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Poster Image
-            Image.network(
-              'https://image.tmdb.org/t/p/w500${movieData!['poster_path']}',
-              width: double.infinity,
-              height: 300,
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Rating and Year
-                  Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.amber),
-                      Text(' ${(movieData!['vote_average'] as num).toStringAsFixed(1)}/10'),
-                      SizedBox(width: 20),
-                      Text(movieData!['release_date'].toString().substring(0, 4)),
-                    ],
+            // Backdrop with gradient overlay
+            Stack(
+              children: [
+                ShaderMask(
+                  shaderCallback: (rect) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.black, Colors.transparent],
+                    ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: Image.network(
+                    backdrop,
+                    height: 400,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 400,
+                        color: Colors.grey[900],
+                        child: const Icon(Icons.error, color: Colors.white),
+                      );
+                    },
                   ),
-                  SizedBox(height: 16),
-
-                  // Trailer Button
-                  if (trailerKey != null)
-                    ElevatedButton.icon(
-                      onPressed: _openTrailer,
-                      icon: Icon(Icons.play_arrow),
-                      label: Text('Watch Trailer'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        textStyle: const TextStyle(
-                          color: Colors.white,
-                        )
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.8),
+                          Colors.black,
+                        ],
                       ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        await _dbService.toggleWatchlist(widget.movieId);
-                        await _checkWatchlistStatus();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(isInWatchlist ? 'Added to watchlist' : 'Removed from watchlist'),
-                            backgroundColor: Colors.green,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          movieData!['title'],
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
-                        );
-                      },
-                      icon: Icon(isInWatchlist ? Icons.bookmark : Icons.bookmark_border),
-                      label: Text(isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    ),
-                  SizedBox(height: 16),
-
-                  // Overview
-                  Text(
-                    'Overview',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _buildInfoChip(
+                              Icons.star,
+                              '${(movieData!['vote_average'] as num).toStringAsFixed(1)}/10',
+                              iconColor: Colors.amber,
+                            ),
+                            _buildInfoChip(
+                              Icons.calendar_today,
+                              movieData!['release_date'].toString().substring(0, 4),
+                            ),
+                            _buildInfoChip(
+                              Icons.timer,
+                              _formatRuntime(movieData!['runtime'] as int?),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(movieData!['overview']),
-                ],
+                ),
+              ],
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black,
+                    Colors.red.shade900,
+                    Colors.black,
+                  ],
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Genres
+                    if (movieData!['genres'] != null) ...[
+                      const Text(
+                        'Genres',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: (movieData!['genres'] as List).map((genre) {
+                          return Chip(
+                            label: Text(
+                              genre['name'],
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: Colors.red.shade900,
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Overview
+                    const Text(
+                      'Overview',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      movieData!['overview'],
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Trailer Button
+                    if (trailerKey != null)
+                      Center(
+                        child: ElevatedButton.icon(
+                          onPressed: _openTrailer,
+                          icon: const Icon(Icons.play_circle_outline,
+                            color: Colors.white,
+                          ),
+                          label: const Text('Watch Trailer',
+                            style:TextStyle(
+                              color: Colors.white,
+                            )
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -166,4 +351,3 @@ class _MoviePageState extends State<MoviePage> {
     );
   }
 }
-
