@@ -5,6 +5,7 @@ import '../models/movie.dart';
 import '../services/movie_service.dart';
 import 'similar_movie_page.dart';
 import 'movie_page.dart';
+import 'login.dart';
 
 class MovieListScreen extends StatefulWidget {
   @override
@@ -183,15 +184,27 @@ class _MovieListScreenState extends State<MovieListScreen> {
           ),
           IconButton(
             icon: const Icon(
-            Icons.bookmark,
-            color: Colors.white,
+              Icons.bookmark,
+              color: Colors.white,
             ),
             onPressed: () {
               Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => WatchlistScreen()),
-            ).then((_) => _refreshMovies());
-          },
+                context,
+                MaterialPageRoute(builder: (context) => WatchlistScreen()),
+              ).then((_) => _refreshMovies());
+            },
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Login()),
+              );
+            },
           ),
         ],
       ),

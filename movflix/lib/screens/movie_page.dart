@@ -173,7 +173,6 @@ class _MoviePageState extends State<MoviePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Backdrop with gradient overlay
             Stack(
               children: [
                 ShaderMask(
@@ -297,7 +296,6 @@ class _MoviePageState extends State<MoviePage> {
                       const SizedBox(height: 24),
                     ],
 
-                    // Overview
                     const Text(
                       'Overview',
                       style: TextStyle(
@@ -316,7 +314,6 @@ class _MoviePageState extends State<MoviePage> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Trailer Button
                     if (trailerKey != null)
                       Center(
                         child: ElevatedButton.icon(

@@ -8,10 +8,7 @@ class MovieService {
   final String baseUrl = 'https://api.themoviedb.org/3';
   final String imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
 
-
-  // HTTP client for reuse
   final http.Client _client = http.Client();
-
 
   Future<List<Movie>> getPopularMovies({int page = 1}) async {
     try {
@@ -150,7 +147,7 @@ class MovieService {
 
   String getImageUrl(String? path) {
     if (path == null || path.isEmpty) {
-      return ''; // Return empty string or a default image URL
+      return '';
     }
     return '$imageBaseUrl$path';
   }
