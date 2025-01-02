@@ -147,7 +147,7 @@ class MovieService {
 
   String getImageUrl(String? path) {
     if (path == null || path.isEmpty) {
-      return ''; // Return empty string or a default image URL
+      return '';
     }
     return '$imageBaseUrl$path';
   }

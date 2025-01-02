@@ -34,7 +34,7 @@ class _SimilarMoviesScreenState extends State<SimilarMoviesScreen> {
 
     setState(() => _isLoading = true);
     try {
-      // First, search for the movie by title
+
       final movies = await _movieService.searchMovieByTitle(
         _movieTitleController.text,
       );
@@ -50,10 +50,8 @@ class _SimilarMoviesScreenState extends State<SimilarMoviesScreen> {
         return;
       }
 
-      // Set the selected movie
       setState(() => _selectedMovie = movies.first);
 
-      // Then get similar movies
       final similarMovies = await _movieService.getSimilarMovies(movies.first.id);
 
       setState(() {
