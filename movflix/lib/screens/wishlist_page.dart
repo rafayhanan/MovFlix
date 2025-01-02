@@ -25,10 +25,8 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
     try {
       setState(() => _isLoading = true);
 
-      // Get movieIds from watchlist
       final movieIds = await _dbService.getWatchlist();
 
-      // Get details for each movie
       final movieDetails = await Future.wait(
           movieIds.map((id) => _movieService.getMovieDetails(id))
       );
