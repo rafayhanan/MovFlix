@@ -24,7 +24,6 @@ class MovieDetails {
   });
 
   factory MovieDetails.fromJson(Map<String, dynamic> json) {
-    // Extract trailer key from videos
     String? trailerKey;
     if (json['videos'] != null && json['videos']['results'] != null) {
       final videos = json['videos']['results'] as List;
@@ -37,10 +36,8 @@ class MovieDetails {
       }
     }
 
-    // Extract genres
     final genresList = (json['genres'] as List?)?.map((genre) => genre['name'] as String).toList() ?? [];
 
-    // Convert runtime to hours and minutes
     final int totalMinutes = json['runtime'] ?? 0;
     final hours = totalMinutes ~/ 60;
     final minutes = totalMinutes % 60;
