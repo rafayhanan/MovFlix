@@ -114,7 +114,6 @@ class SignupState extends State<Signup> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Logo and Title
                     Icon(
                       Icons.movie,
                       size: 80,
@@ -132,7 +131,6 @@ class SignupState extends State<Signup> {
                       ),
                     ),
                     const SizedBox(height: 40),
-                    // Signup Form
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
