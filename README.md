@@ -3,7 +3,8 @@ A movie listing mobile app made using flutter and TMDB API.
 
 ## Prerequisites
 - Flutter SDK
-- Firebase 
+- Firebase Setup
+- Android Studio or VS Code
 
 ## Getting Started
 
