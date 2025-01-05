@@ -1,5 +1,5 @@
 # MovFlix
-A movie listing mobile app made using flutter and TMDB API.
+A movie listing mobile app made using flutter and tmdb Api.
 
 ## Prerequisites
 - Flutter SDK
